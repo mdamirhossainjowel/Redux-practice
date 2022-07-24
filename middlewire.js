@@ -1,4 +1,5 @@
-const { createStore } = require("redux");
+const { createStore,applyMiddleware} = require("redux");
+const {default: logger}=require("redux-logger");
 
 const ADDUSER = "ADDUSER";
 
@@ -25,7 +26,7 @@ const userReducer = (state = userState, action) => {
   }
 };
 
-const store = createStore(userReducer);
+const store = createStore(userReducer,applyMiddleware(logger));
 
 store.subscribe(() => {
   console.log(store.getState());
