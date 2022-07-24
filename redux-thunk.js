@@ -1,11 +1,11 @@
-const { createStore,applyMiddleware} = require("redux");
-const thunk=require("redux-thunk").default;
-const axios=require("axios");
+const { createStore, applyMiddleware } = require("redux");
+const thunk = require("redux-thunk").default;
+const axios = require("axios");
 
 const REQUEST = "REQUEST";
 const SUCCESS = "SUCCESS";
 const FAILED = "FAILED";
-const api='https://jsonplaceholder.typicode.com/posts'
+const api = "https://jsonplaceholder.typicode.com/posts";
 
 const initialPost = {
   posts: [],
@@ -41,7 +41,7 @@ const postReducer = (state = initialPost, action) => {
     case SUCCESS:
       return {
         isLoading: false,
-        posts: [...state.post, action.payload],
+        posts: action.payload,
         error: null,
       };
     case FAILED:
@@ -54,26 +54,25 @@ const postReducer = (state = initialPost, action) => {
       return state;
   }
 };
-const fetchData=()=>{
-return(dispatch)=>{
+const fetchData = () => {
+  return (dispatch) => {
     dispatch(postRequest());
-    axios.get(api)
-    .then(res=>{
-        const posts=res.data;
-        const post=posts.map((post)=>{
-            console.log(post.body);
-        })
-    })
-    .catch((error)=>{
-        console.log(error.message)
-    })
-}
-}
+    axios
+      .get(api)
+      .then((res) => {
+        const posts = res.data;
+        const post = posts.map((p) => p.body);
+        dispatch(postSuccess(post))
+      })
+      .catch((error) => {
+        dispatch(postFailed(error.message));
+      });
+  };
+};
 
+const store = createStore(postReducer, applyMiddleware(thunk));
 
-const store = createStore(postReducer,applyMiddleware(thunk));
-
-store.subscribe(()=>{
-    console.log(store.getState());
-})
-store.dispatch(fetchData())
+store.subscribe(() => {
+  console.log(store.getState());
+});
+store.dispatch(fetchData());
